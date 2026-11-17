@@ -192,7 +192,7 @@
                     <input type="text" id="demanda-titulo" required placeholder="Ex: Solicitar orçamento de equipamentos" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white">
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <label for="demanda-status" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Status *</label>
                         <select id="demanda-status" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white">
@@ -200,6 +200,11 @@
                             <option value="Aguardando retorno">🟡 Aguardando retorno</option>
                             <option value="Concluído">🟢 Concluído</option>
                         </select>
+                    </div>
+
+                    <div>
+                        <label for="demanda-data-solicitacao" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Data Solicitação</label>
+                        <input type="date" id="demanda-data-solicitacao" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white">
                     </div>
 
                     <div>
@@ -521,6 +526,15 @@
                                     </span>
                                 ` : ''}
 
+                                ${demanda.dataSolicitacao ? `
+                                    <span class="inline-flex items-center gap-1 text-slate-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Solicitado em: <strong>${formatarDataBR(demanda.dataSolicitacao)}</strong>
+                                    </span>
+                                ` : ''}
+
                                 ${demanda.prazo ? `
                                     <span class="inline-flex items-center gap-1 text-slate-600">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -530,7 +544,7 @@
                                     </span>
                                 ` : ''}
 
-                                ${demanda.criadoEm ? `
+                                ${!demanda.dataSolicitacao && demanda.criadoEm ? `
                                     <span class="text-slate-400">Criado em ${escaparHTML(demanda.criadoEm)}</span>
                                 ` : ''}
                             </div>
@@ -587,6 +601,13 @@
             document.getElementById('form-demanda').reset();
             document.getElementById('demanda-id').value = '';
             document.getElementById('demanda-status').value = 'A solicitar';
+            
+            // Preenche com a data atual por padrão (formato YYYY-MM-DD local)
+            const hoje = new Date();
+            const ano = hoje.getFullYear();
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            const dia = String(hoje.getDate()).padStart(2, '0');
+            document.getElementById('demanda-data-solicitacao').value = `${ano}-${mes}-${dia}`;
 
             document.getElementById('modal-demanda').classList.remove('hidden');
             setTimeout(() => document.getElementById('demanda-titulo').focus(), 100);
@@ -604,6 +625,7 @@
             document.getElementById('demanda-titulo').value = demanda.titulo || '';
             document.getElementById('demanda-status').value = demanda.status || 'A solicitar';
             document.getElementById('demanda-responsavel').value = demanda.responsavel || '';
+            document.getElementById('demanda-data-solicitacao').value = demanda.dataSolicitacao || '';
             document.getElementById('demanda-prazo').value = demanda.prazo || '';
             document.getElementById('demanda-descricao').value = demanda.descricao || '';
 
@@ -624,6 +646,7 @@
             const titulo = document.getElementById('demanda-titulo').value.trim();
             const status = document.getElementById('demanda-status').value;
             const responsavel = document.getElementById('demanda-responsavel').value.trim();
+            const dataSolicitacao = document.getElementById('demanda-data-solicitacao').value;
             const prazo = document.getElementById('demanda-prazo').value;
             const descricao = document.getElementById('demanda-descricao').value.trim();
 
@@ -633,7 +656,7 @@
                 if (id) {
                     const idx = demandas.findIndex(d => d.id === id);
                     if (idx !== -1) {
-                        demandas[idx] = { ...demandas[idx], titulo, status, responsavel, prazo, descricao };
+                        demandas[idx] = { ...demandas[idx], titulo, status, responsavel, dataSolicitacao, prazo, descricao };
                     }
                     mostrarToast('Demanda atualizada localmente!');
                 } else {
@@ -642,6 +665,7 @@
                         titulo,
                         status,
                         responsavel,
+                        dataSolicitacao,
                         prazo,
                         descricao,
                         criadoEm: new Date().toLocaleDateString('pt-BR'),
@@ -662,6 +686,7 @@
                         titulo,
                         status,
                         responsavel,
+                        dataSolicitacao,
                         prazo,
                         descricao
                     });
@@ -672,6 +697,7 @@
                         titulo,
                         status,
                         responsavel,
+                        dataSolicitacao,
                         prazo,
                         descricao,
                         criadoEm: new Date().toLocaleDateString('pt-BR'),
